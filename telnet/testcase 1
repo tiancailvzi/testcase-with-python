@@ -1,0 +1,38 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+import pexpect
+
+if __name__ == '__main__':
+         user = 'ADMIN'
+         ip = '172.30.188.28'
+         password = 'ADMIN'
+
+         child = pexpect.spawn('telnet %s' %ip)
+         child.expect('login:')
+         child.sendline(user)
+         child.expect('Password:')
+         child.sendline(password)
+         child.expect('#')
+         child.sendline('sh version')
+         child.expect('#')
+         #将命令结果输出 child.before，这里下了两个命令 要两个输出 ，只有一个print 只对应一个
+         print child.before
+         child.sendline("sh ip int")
+         child.expect("#")
+         print child.before
+#        child.sendline("echo '112' >> /home/1.txt")
+ # 将 telnet 子程序的执行权交给用户.
+         child.interact()
+
+         pass
+      
+#通常一个 python 主程序通过 pexpect.spawn 启动一个子程序，一旦该子程序启动后，
+python 主程序就可以通过 child.expect 和 child.send/child.sendline 来和子程序通话，
+python 主程序运行结束后，子程序也就死了。比如 python 主程序通过 pexpect.spawn 启动了一个 telnet 子程序，
+在进行完一系列的 telnet 上的命令操作后，python 主程序运行结束了，那么该 telnet session（telnet 子程序）也会自动退出。
+但是如果调用 child.interact，那么该子程序（python 主程序通过 pexpect.spawn 衍生成的）就可以在运行到 child.interact 时，
+将子程序的控制权交给了终端用户（the human at the keyboard），用户可以通过键盘的输入来和子程序进行命令交互，
+管理子程序的生杀大权，用户的键盘输入 stdin 会被传给子程序，而且子程序的 stdout 和 stderr 输出也会被打印出来到终端。
+默认 ctrl + ] 退出 interact() 模式，把子程序的执行权重新交给 python 主程序。参数 escape_character 指定了交互模式的退出字符，
+例如 child.interact(chr(26)) 接下来就会变成 ctrl + z 退出 interact() 模式。
